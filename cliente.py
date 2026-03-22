@@ -1,6 +1,10 @@
-from dataclasses import  dataclass
+from pydantic import BaseModel
 
-@dataclass(frozen=True)
-class Cliente:
+class ClienteCreate(BaseModel):
     cpf: str
     nome: str = ""
+
+class ClienteOut(BaseModel):
+    cpf: str
+    nome: str = ""
+
