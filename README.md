@@ -1,49 +1,117 @@
-### Criar um projeto no PyCharm com o python  na versão 12.7
+# Lanchonete API
 
-### Abrir o terminal e instalar 
-•	pip install "fastapi[standard]"
+API REST para gerenciamento de clientes, produtos e pedidos de uma lanchonete, construída com **FastAPI** e **Python 3.12**.
 
-### Gere o arquivo para deploy futuro requirements.txt
-### Caso com pip:
+---
 
-	pip freeze > requirements.txt
+## Requisitos
 
-### Caso uso do poetry	
+- Python 3.12
+- pip
 
-	poetry export -f requirements.txt --output requirements.txt --without-hashes
+---
 
-### Gere o arquivo para desinstalar todas as bibliotecas
-	
-    pip freeze > uninstall.txt
+## Configuração do ambiente
 
-### Para retirar execute:
+### 1. Criar o ambiente virtual
 
-	pip uninstall -r uninstall.txt -y
+```bash
+sudo apt install python3.12-venv   # caso não tenha o módulo venv
+python3 -m venv venv
+```
 
-### Para executar o projeto execute:
+### 2. Ativar / desativar o venv
 
-	fastapi dev main.py
+```bash
+source venv/bin/activate    # ativar
+source venv/bin/deactivate  # desativar
+```
 
+### 3. Instalar dependências
 
-### Estrutura do projeto
+```bash
+pip install "fastapi[standard]"
+```
 
-	domain/__init__.py 
+---
 
-	schemas/__init__.py 
+## Executar o projeto
 
-	repositories/__init__.py 
+```bash
+fastapi dev main.py
+```
 
-	services/__init__.py 
+---
 
-	api/__init__.py 
+## Testes
 
-	api/routes/__init__.py
+### Instalar dependências de teste
 
+```bash
+pip install pytest httpx
+```
 
-### Configurando o venv
+### Rodar os testes
 
-sudo apt install python3.12-venv
+```bash
+pytest -q
+```
 
-source venv/bin/activate
+---
 
-source venv/bin/deactivate
+## Estrutura do projeto
+
+```
+main.py
+api/
+    __init__.py
+    routes/
+        __init__.py
+        clientes.py
+        health.py
+        pedidos.py
+        produtos.py
+domain/
+    __init__.py
+    cliente.py
+    pedido.py
+    produto.py
+repositories/
+    __init__.py
+    memory.py
+schemas/
+    __init__.py
+    cliente.py
+    pedido.py
+    produto.py
+services/
+    __init__.py
+    lanchonete_service.py
+tests/
+    conftest.py
+    test_api_clientes.py
+    test_api_pedidos.py
+    test_domain_pedido.py
+    test_domain_produto.py
+```
+
+---
+
+## Deploy
+
+### Gerar `requirements.txt`
+
+```bash
+# Com pip
+pip freeze > requirements.txt
+
+# Com poetry
+poetry export -f requirements.txt --output requirements.txt --without-hashes
+```
+
+### Desinstalar todas as bibliotecas
+
+```bash
+pip freeze > uninstall.txt
+pip uninstall -r uninstall.txt -y
+```
