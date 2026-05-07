@@ -100,3 +100,7 @@ class Pedido:
 
        return True
 
+       return ObservacaoOut(
+    codigo=pedido.codigo,
+    observacao=pedido.observacao 
+    )
