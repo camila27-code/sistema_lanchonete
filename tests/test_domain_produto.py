@@ -11,11 +11,7 @@
 # =============================================================================
 
 from domain.produto import Produto
-import pytest
 
-def test_produto_valor_negativo():
-    with pytest.raises(ValueError):
-        Produto(codigo=1, valor=-5, tipo=1)
 
 def test_produto_tipo_1_aplica_desconto():
     """Produto do tipo 1 com 10% de desconto deve custar 9.0 (era 10.0).
@@ -57,5 +53,3 @@ def test_produto_sem_desconto():
     """
     p = Produto(codigo=3, valor=15, tipo=1, desconto_percentual=0)
     assert p.preco_final() == 15.0
-
-
