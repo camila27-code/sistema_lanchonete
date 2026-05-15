@@ -6,13 +6,12 @@
 # todo o ciclo de vida de um pedido passando pela API, do cadastro dos
 # dados até a finalização com cálculo do total.
 #
-# Testes de ponta a ponta são mais lentos que unitários, mas garantem
-# que todos os componentes (rotas, service, domínio, repositório)
-# funcionam corretamente em conjunto.
+# Com a migração para Tortoise ORM async, as chamadas ao client usam `await`
+# e as funções de teste são declaradas como `async def`.
 # =============================================================================
 
 
-def test_fluxo_completo_pedido(client):
+async def test_fluxo_completo_pedido(client):
     """Simula o ciclo de vida completo de um pedido via API.
 
     Etapas do fluxo:
@@ -33,43 +32,43 @@ def test_fluxo_completo_pedido(client):
         seguintes (adicionar item e finalizar).
     """
     # 1. Cria o cliente que fará o pedido
-    client.post("/clientes", json={"cpf": "11122233344", "nome": "Cliente X"})
+    await client.post("/clientes", json={"cpf": "11122233344", "nome": "Cliente X"})
 
     # 2. Cria os produtos disponíveis no cardápio
     #    Produto 1 (tipo 1): desconto será aplicado
     #    Produto 2 (tipo 2): desconto será ignorado pela regra de negócio
-    client.post("/produtos", json={"codigo": 1, "valor": 10, "tipo": 1, "desconto_percentual": 10})
-    client.post("/produtos", json={"codigo": 2, "valor": 20, "tipo": 2, "desconto_percentual": 10})
+    await client.post("/produtos", json={"codigo": 1, "valor": 10, "tipo": 1, "desconto_percentual": 10})
+    await client.post("/produtos", json={"codigo": 2, "valor": 20, "tipo": 2, "desconto_percentual": 10})
 
     # 3. Abre o pedido com o primeiro produto já incluído
-    r = client.post("/lanchonete/pedidos", json={"cpf": "11122233344", "cod_produto": 1, "qtd_max_produtos": 10})
+    r = await client.post("/lanchonete/pedidos", json={"cpf": "11122233344", "cod_produto": 1, "qtd_max_produtos": 10})
     assert r.status_code == 200
     cod_pedido = r.json()["codigo"]  # guarda o código para usar nas próximas chamadas
 
     # 4. Adiciona o segundo produto ao pedido já existente
-    r2 = client.put(f"/lanchonete/pedidos/{cod_pedido}/itens", json={"cod_produto": 2})
+    r2 = await client.put(f"/lanchonete/pedidos/{cod_pedido}/itens", json={"cod_produto": 2})
     assert r2.status_code == 200
 
     # 5. Finaliza o pedido e valida o total calculado
-    r3 = client.post(f"/lanchonete/pedidos/{cod_pedido}/finalizar")
+    r3 = await client.post(f"/lanchonete/pedidos/{cod_pedido}/finalizar")
     assert r3.status_code == 200
     assert r3.json()["total"] == 29.0
 
-def test_criar_e_buscar_pedido_por_codigo(client):
- 
-    client.post("/clientes", json={"cpf": "11122233344", "nome": "Cliente Teste"})
-    client.post("/produtos", json={"codigo": 1, "valor": 10.0, "tipo": 1, "desconto_percentual": 0})
+async def test_pedido_com_limite_atingido(client):
+    
+    await client.post("/clientes", json={"cpf": "11122233344", "nome": "Cliente X"})
+    await client.post("/produtos", json={"codigo": 1, "valor": 10.0, "tipo": 1, "desconto_percentual": 0})
+    await client.post("/produtos", json={"codigo": 2, "valor": 15.0, "tipo": 1, "desconto_percentual": 0})
 
-
-    r_criar = client.post("/lanchonete/pedidos", json={
+    await client.post("/lanchonete/pedidos", json={
         "cpf": "11122233344",
         "cod_produto": 1,
-        "qtd_max_produtos": 5
+        "qtd_max_produtos": 1
     })
-    assert r_criar.status_code == 200
-    cod_pedido = r_criar.json()["codigo"]
 
-    r_buscar = client.get(f"/lanchonete/pedidos/{cod_pedido}")
+    response = await client.put("/lanchonete/pedidos/1/itens", json={"cod_produto": 2})
 
-    assert r_buscar.status_code == 200
-    assert r_buscar.json()["codigo"] == cod_pedido
+
+    assert response.status_code == 400
+    
+     
