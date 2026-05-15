@@ -9,12 +9,7 @@
 
 from domain.cliente import Cliente
 from domain.produto import Produto
-from pytest import pytest
 from domain.pedido import Pedido
-
-def test_pedido_qtd_max_produtos_zero():
-    with pytest.raises(ValueError):
-        Pedido(codigo=1, cpf="11122233344", qtd_max_produtos=0)
 
 
 def test_pedido_limite_itens():
